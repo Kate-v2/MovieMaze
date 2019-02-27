@@ -54,7 +54,7 @@
 
 	var _nav_bar2 = _interopRequireDefault(_nav_bar);
 
-	var _welcome = __webpack_require__(8);
+	var _welcome = __webpack_require__(5);
 
 	var _welcome2 = _interopRequireDefault(_welcome);
 
@@ -144,9 +144,13 @@
 
 	var _session_tools2 = _interopRequireDefault(_session_tools);
 
-	var _search_titles = __webpack_require__(4);
+	var _search_titles = __webpack_require__(6);
 
 	var _search_titles2 = _interopRequireDefault(_search_titles);
+
+	var _session_form = __webpack_require__(10);
+
+	var _session_form2 = _interopRequireDefault(_session_form);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -160,6 +164,7 @@
 
 	    this.tool = new _dom_tools2.default();
 	    this.session = new _session_tools2.default();
+	    // this.form    = new SessionForm
 	    // this.search  = new SearchTitles
 	    // this.results = new TitleResults
 	  }
@@ -174,7 +179,9 @@
 	      var search = this.searchArea();
 	      div.appendChild(search);
 	      var register = this.registerButton();
-	      div.appendChild(register);
+	      if (register) {
+	        div.appendChild(register);
+	      }
 	      var sesh = this.sessionButton();
 	      div.appendChild(sesh);
 	    }
@@ -237,6 +244,12 @@
 	        return null;
 	      }
 	      var span = this.navButton('register');
+
+	      span.addEventListener('click', function () {
+	        var form = new _session_form2.default();
+	        form.loadRegister();
+	      });
+
 	      var p = this.buttonText('Register', 'registerText');
 	      span.appendChild(p);
 	      return span;
@@ -250,8 +263,19 @@
 	      var span = this.navButton('register');
 	      if (this.session.isLoggedIn()) {
 	        var p = this.buttonText('Logout', 'registerText');
+
+	        span.addEventListener('click', function () {
+	          sessionStorage.clear();
+	          var nav = new NavBar();
+	          nav.loadNav();
+	        });
 	      } else {
 	        var p = this.buttonText('Login', 'registerText');
+
+	        span.addEventListener('click', function () {
+	          var form = new _session_form2.default();
+	          form.loadLogin();
+	        });
 	      }
 	      span.appendChild(p);
 	      return span;
@@ -288,7 +312,7 @@
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -298,11 +322,31 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _dom_tools = __webpack_require__(1);
+
+	var _dom_tools2 = _interopRequireDefault(_dom_tools);
+
+	var _session_service = __webpack_require__(4);
+
+	var _session_service2 = _interopRequireDefault(_session_service);
+
+	var _nav_bar = __webpack_require__(2);
+
+	var _nav_bar2 = _interopRequireDefault(_nav_bar);
+
+	var _welcome = __webpack_require__(5);
+
+	var _welcome2 = _interopRequireDefault(_welcome);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var SessionTools = function () {
 	  function SessionTools() {
 	    _classCallCheck(this, SessionTools);
+
+	    this.tool = new _dom_tools2.default();
 	  }
 
 	  _createClass(SessionTools, [{
@@ -329,6 +373,60 @@
 	        this.setToken(token);
 	      }
 	    }
+	  }, {
+	    key: 'getRegisterInfo',
+	    value: function getRegisterInfo() {
+	      var email = this.tool.getElement('Email').value;
+	      var user = this.tool.getElement('Username').value;
+	      var pw = this.tool.getElement('Password').value;
+	      var pwConf = this.tool.getElement('PasswordConf').value;
+
+	      var obj = {
+	        'email': email,
+	        'username': user,
+	        'password': pw,
+	        'password_confirmation': pwConf
+	      };
+	      return obj;
+	    }
+	  }, {
+	    key: 'getLoginInfo',
+	    value: function getLoginInfo() {
+	      var user = this.tool.getElement('Username').value;
+	      var pw = this.tool.getElement('Password').value;
+
+	      var obj = {
+	        'username': user,
+	        'password': pw
+	      };
+	      return obj;
+	    }
+	  }, {
+	    key: 'signup',
+	    value: function signup() {
+	      var obj = this.getRegisterInfo();
+	      var sesh = new _session_service2.default();
+	      sesh.register(obj);
+
+	      var nav = new _nav_bar2.default();
+	      nav.loadNav();
+
+	      var welc = new _welcome2.default();
+	      welc.loadWelcome();
+	    }
+	  }, {
+	    key: 'login',
+	    value: function login() {
+	      var obj = this.getLoginInfo();
+	      var sesh = new _session_service2.default();
+	      sesh.login(obj);
+
+	      var nav = new _nav_bar2.default();
+	      nav.loadNav();
+
+	      var welc = new _welcome2.default();
+	      welc.loadWelcome();
+	    }
 	  }]);
 
 	  return SessionTools;
@@ -348,7 +446,169 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _title_results = __webpack_require__(5);
+	var _session_tools = __webpack_require__(3);
+
+	var _session_tools2 = _interopRequireDefault(_session_tools);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var SessionService = function () {
+	  function SessionService() {
+	    _classCallCheck(this, SessionService);
+	  }
+
+	  _createClass(SessionService, [{
+	    key: 'register',
+	    value: function register(data) {
+	      var body = 'username=' + data['username'] + '&password=' + data['password'] + '&password_confirmation=' + data['password_confirmation'] + '&email=' + data['email'];
+	      var url = 'https://movie-maze.herokuapp.com/users?' + body;
+
+	      var sesh = new _session_tools2.default();
+
+	      var data;
+	      var req = new XMLHttpRequest();
+	      req.open('POST', url, true);
+	      req.setRequestHeader("Content-Type", "application/json");
+	      req.setRequestHeader("Accept", "application/json");
+	      req.onload = function () {
+	        var stat = this.status;
+	        var valid = stat >= 200 && stat < 300;
+	        if (valid) {
+	          data = JSON.parse(this.responseText)['data']['attributes']['token'];
+	          sesh.setToken(data);
+	        }
+	        // else { console.log(this.error) }
+	      };
+	      req.send();
+	    }
+	  }, {
+	    key: 'login',
+	    value: function login(data) {
+	      var body = 'username=' + data['username'] + '&password=' + data['password'];
+	      var url = 'https://movie-maze.herokuapp.com/sessions?' + body;
+
+	      var sesh = new _session_tools2.default();
+
+	      var data;
+	      var req = new XMLHttpRequest();
+	      req.open('POST', url, true);
+	      req.setRequestHeader("Content-Type", "application/json");
+	      req.setRequestHeader("Accept", "application/json");
+	      req.onload = function () {
+	        var stat = this.status;
+	        var valid = stat >= 200 && stat < 300;
+	        if (valid) {
+	          data = JSON.parse(this.responseText)['data']['attributes']['token'];
+	          sesh.setToken(data);
+	        }
+	        // else { console.log(this.error) }
+	      };
+	      req.send();
+	    }
+	  }]);
+
+	  return SessionService;
+	}();
+
+	exports.default = SessionService;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _dom_tools = __webpack_require__(1);
+
+	var _dom_tools2 = _interopRequireDefault(_dom_tools);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Welcome = function () {
+	  function Welcome() {
+	    _classCallCheck(this, Welcome);
+
+	    this.tool = new _dom_tools2.default();
+	  }
+
+	  _createClass(Welcome, [{
+	    key: 'loadWelcome',
+	    value: function loadWelcome() {
+	      var div = this.tool.getElement('content');
+	      this.tool.clearElement(div);
+
+	      var p1 = this.welcomeText(this.p1(), 'p1');
+	      div.appendChild(p1);
+
+	      var p2 = this.welcomeText(this.p2(), 'p2');
+	      div.appendChild(p2);
+
+	      var p3 = this.welcomeText(this.p3(), 'p3');
+	      div.appendChild(p3);
+
+	      var p4 = this.welcomeText(this.p4(), 'p4');
+	      div.appendChild(p4);
+	    }
+	  }, {
+	    key: 'welcomeText',
+	    value: function welcomeText(text) {
+	      var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+	      var p = this.tool.newElement('p');
+	      p.innerHTML = text;
+	      this.tool.elementNames(p, id, 'WelcomeText');
+	      return p;
+	    }
+	  }, {
+	    key: 'p1',
+	    value: function p1() {
+	      return "Welcome to MovieMaze!";
+	    }
+	  }, {
+	    key: 'p2',
+	    value: function p2() {
+	      return "Use this app to find movies/shows by title, see details about them, and find out where they're streaming!";
+	    }
+	  }, {
+	    key: 'p3',
+	    value: function p3() {
+	      return "Register or Login to create favorites & a watchlist.";
+	    }
+	  }, {
+	    key: 'p4',
+	    value: function p4() {
+	      return "To get started, use the search bar to find a movie or show title. When you get to the results, please pick the correct title.";
+	    }
+	  }]);
+
+	  return Welcome;
+	}();
+
+	exports.default = Welcome;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _title_results = __webpack_require__(7);
 
 	var _title_results2 = _interopRequireDefault(_title_results);
 
@@ -421,7 +681,7 @@
 	exports.default = SearchTitles;
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -442,7 +702,7 @@
 
 	var _session_tools2 = _interopRequireDefault(_session_tools);
 
-	var _movie_service = __webpack_require__(6);
+	var _movie_service = __webpack_require__(8);
 
 	var _movie_service2 = _interopRequireDefault(_movie_service);
 
@@ -568,7 +828,7 @@
 	exports.default = TitleResults;
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -579,7 +839,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _movie = __webpack_require__(7);
+	var _movie = __webpack_require__(9);
 
 	var _movie2 = _interopRequireDefault(_movie);
 
@@ -626,7 +886,7 @@
 	exports.default = MovieService;
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -931,7 +1191,7 @@
 	exports.default = Movie;
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -946,71 +1206,184 @@
 
 	var _dom_tools2 = _interopRequireDefault(_dom_tools);
 
+	var _session_tools = __webpack_require__(3);
+
+	var _session_tools2 = _interopRequireDefault(_session_tools);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var Welcome = function () {
-	  function Welcome() {
-	    _classCallCheck(this, Welcome);
+	var SessionForm = function () {
+	  function SessionForm() {
+	    _classCallCheck(this, SessionForm);
 
 	    this.tool = new _dom_tools2.default();
+	    this.session = new _session_tools2.default();
 	  }
 
-	  _createClass(Welcome, [{
-	    key: 'loadWelcome',
-	    value: function loadWelcome() {
-	      var div = this.tool.getElement('content');
-	      this.tool.clearElement(div);
+	  _createClass(SessionForm, [{
+	    key: 'loadRegister',
+	    value: function loadRegister() {
+	      var content = this.tool.getElement('content');
+	      this.tool.clearElement(content);
 
-	      var p1 = this.welcomeText(this.p1(), 'p1');
-	      div.appendChild(p1);
+	      var element = this.tool.newElement('span');
+	      this.tool.elementNames(element, 'RegisterForm');
 
-	      var p2 = this.welcomeText(this.p2(), 'p2');
-	      div.appendChild(p2);
+	      var email = this.makeEmail(element);
+	      var user = this.makeUsername(element);
+	      var pw = this.makePassword(element);
+	      var pwConf = this.makeConfPassword(element);
+	      var submit = this.makeSubmit(element);
 
-	      var p3 = this.welcomeText(this.p3(), 'p3');
-	      div.appendChild(p3);
+	      content.appendChild(element);
 
-	      var p4 = this.welcomeText(this.p4(), 'p4');
-	      div.appendChild(p4);
+	      var go = this.tool.getElement('submit');
+	      go.addEventListener('click', function () {
+	        var sesh = new _session_tools2.default();
+	        sesh.signup();
+	      });
 	    }
 	  }, {
-	    key: 'welcomeText',
-	    value: function welcomeText(text) {
-	      var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+	    key: 'loadLogin',
+	    value: function loadLogin() {
+	      var content = this.tool.getElement('content');
+	      this.tool.clearElement(content);
+
+	      var element = this.tool.newElement('span');
+	      this.tool.elementNames(element, 'LoginForm');
+
+	      var user = this.makeUsername(element);
+	      var pw = this.makePassword(element);
+	      var submit = this.makeSubmit(element);
+
+	      content.appendChild(element);
+
+	      var go = this.tool.getElement('submit');
+	      go.addEventListener('click', function () {
+	        var sesh = new _session_tools2.default();
+	        sesh.login();
+	      });
+	    }
+
+	    // ------ fields -------
+
+
+	  }, {
+	    key: 'makeEmail',
+	    value: function makeEmail(element) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, null, 'formFieldContainer');
+
+	      this.makeTitle("Email:", span);
+	      this.makeField("Email", "Email", span);
+
+	      element.appendChild(span);
+	      return span;
+	    }
+	  }, {
+	    key: 'makeUsername',
+	    value: function makeUsername(element) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, null, 'formFieldContainer');
+
+	      this.makeTitle("Username:", span);
+	      this.makeField("Username", "Username", span);
+
+	      element.appendChild(span);
+	      return span;
+	    }
+	  }, {
+	    key: 'makePassword',
+	    value: function makePassword(element) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, null, 'formFieldContainer');
+
+	      this.makeTitle("Password:", span);
+	      this.makePasswordField("Password", "Password", span);
+
+	      element.appendChild(span);
+	      return span;
+	    }
+	  }, {
+	    key: 'makeConfPassword',
+	    value: function makeConfPassword(element) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, null, 'formFieldContainer');
+
+	      this.makeTitle("Password Confirmation:", span);
+	      this.makePasswordField("Password", "PasswordConf", span);
+
+	      element.appendChild(span);
+	      return span;
+	    }
+
+	    //  --- Builder ---
+
+	  }, {
+	    key: 'makeTitle',
+	    value: function makeTitle(text, element) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, null, 'formTitle');
 
 	      var p = this.tool.newElement('p');
 	      p.innerHTML = text;
-	      this.tool.elementNames(p, id, 'WelcomeText');
-	      return p;
+	      span.appendChild(p);
+
+	      element.appendChild(span);
+	      return span;
 	    }
 	  }, {
-	    key: 'p1',
-	    value: function p1() {
-	      return "Welcome to MovieMaze!";
+	    key: 'makeField',
+	    value: function makeField(placeholder, id, element) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, null, 'formField');
+
+	      var input = this.tool.newElement('input');
+	      input.type = 'text';
+	      input.placeholder = placeholder;
+	      input.id = id;
+
+	      span.appendChild(input);
+	      element.appendChild(span);
+	      return span;
 	    }
 	  }, {
-	    key: 'p2',
-	    value: function p2() {
-	      return "Use this app to find movies/shows by title, see details about them, and find out where they're streaming!";
+	    key: 'makePasswordField',
+	    value: function makePasswordField(placeholder, id, element) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, null, 'formField');
+
+	      var input = this.tool.newElement('input');
+	      input.type = 'password';
+	      input.placeholder = placeholder;
+	      input.id = id;
+
+	      span.appendChild(input);
+	      element.appendChild(span);
+	      return span;
 	    }
 	  }, {
-	    key: 'p3',
-	    value: function p3() {
-	      return "Register or Login to create favorites & a watchlist.";
-	    }
-	  }, {
-	    key: 'p4',
-	    value: function p4() {
-	      return "To get started, use the search bar to find a movie or show title. When you get to the results, please pick the correct title.";
+	    key: 'makeSubmit',
+	    value: function makeSubmit(element) {
+	      var span = this.tool.newElement('div');
+	      this.tool.elementNames(span, 'FormSubmit');
+
+	      var input = this.tool.newElement('input');
+	      input.type = 'submit';
+	      input.id = 'submit';
+
+	      span.appendChild(input);
+	      element.appendChild(span);
+	      return span;
 	    }
 	  }]);
 
-	  return Welcome;
+	  return SessionForm;
 	}();
 
-	exports.default = Welcome;
+	exports.default = SessionForm;
 
 /***/ })
 /******/ ]);
