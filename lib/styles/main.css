@@ -22,11 +22,17 @@
 }
 
 #searchContainer {
+  width: 50%;
   display:         flex;
   flex-direction:  row;
   flex-wrap:       nowrap;
   justify-content: space-around;
   align-items:     stretch;
+}
+
+#search-bar {
+  width: 80%;
+
 }
 #ResultsPageSearchTerm {
   justify-content: center;
@@ -85,4 +91,87 @@
   max-height: 150px;
   width: auto;
   /* height: auto; */
+}
+
+#Details {
+  background:      #18212A;
+  color:           white;
+  width:           90%;
+  display:         flex;
+  flex-direction:  row;
+  flex-wrap:       nowrap;
+  /* font-size:       90%; */
+  align-content:   space-around;
+  align-items:     center;
+  margin-top:      10%;
+  margin-left:  5%;
+  margin-right:  5%;
+  padding-top: 10%;
+  padding-bottom: 10%;
+}
+
+#Header {
+  width:           90%;
+  display:         flex;
+  flex-direction:  row;
+  flex-wrap:       nowrap;
+  align-content:   space-around;
+  align-items:     center;
+
+}
+
+#Header span {
+  margin: 5%
+}
+
+#Title {
+  font-size: 160%;
+  font-weight: bold;
+}
+
+#Year {
+  color: #6b717a;
+  font-size: 160%;
+  font-weight: bold;
+}
+
+#SubHeader {
+  display:         flex;
+  flex-direction:  row;
+  flex-wrap:       nowrap;
+  /* align-content:   space-around; */
+  align-content: space-between;
+  align-items:     center;
+}
+
+#SubHeader span {
+  color: #6b717a;
+  font-size: 160%;
+  font-weight: bold;
+  margin: 5%;
+}
+
+#Details #Poster {
+  padding: 10%;
+}
+
+#Actors {
+  font-size: 110%;
+}
+
+#Streams {
+  align-content: center;
+  align-items: center;
+}
+
+.service {
+  color: black;
+  font-size: 130%;
+  font-weight: bold;
+  padding: 3%;
+  background: #6b717a
+}
+
+#Text {
+  margin-right: 10%;
 }
