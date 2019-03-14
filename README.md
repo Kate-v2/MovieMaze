@@ -4,7 +4,7 @@
 
 
 #### Check it in action!
-* [APP]()
+* [APP](https://kate-v2.github.io/MovieMaze/)
 * [MovieMaze API](https://movie-maze.herokuapp.com/)
 
 ## Setup
@@ -23,7 +23,7 @@ This app obtains data through:
 
 
 ## How to Use
-1. Go to [MovieMaze]()
+1. Go to [MovieMaze](https://kate-v2.github.io/MovieMaze/)
 1. User the search bar to look up a title
 1. Pick the title you want
 1. View movie/series details
