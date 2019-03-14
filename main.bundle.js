@@ -462,36 +462,26 @@
 	  _createClass(SessionService, [{
 	    key: 'register',
 	    value: function register(data) {
-	      var body = 'username=' + data['username'] + '&password=' + data['password'] + '&password_confirmation=' + data['password_confirmation'] + '&email=' + data['email'];
-	      var url = 'https://movie-maze.herokuapp.com/users?' + body;
-
-	      var sesh = new _session_tools2.default();
-
-	      var data;
-	      var req = new XMLHttpRequest();
-	      req.open('POST', url, true);
-	      req.setRequestHeader("Content-Type", "application/json");
-	      req.setRequestHeader("Accept", "application/json");
-	      req.onload = function () {
-	        var stat = this.status;
-	        var valid = stat >= 200 && stat < 300;
-	        if (valid) {
-	          data = JSON.parse(this.responseText)['data']['attributes']['token'];
-	          sesh.setToken(data);
-	        }
-	        // else { console.log(this.error) }
-	      };
-	      req.send();
+	      var url = 'https://movie-maze.herokuapp.com/users';
+	      this.setup(data, url);
 	    }
 	  }, {
 	    key: 'login',
 	    value: function login(data) {
-	      var body = 'username=' + data['username'] + '&password=' + data['password'];
-	      var url = 'https://movie-maze.herokuapp.com/sessions?' + body;
+	      var url = 'https://movie-maze.herokuapp.com/sessions';
+	      this.setup(data, url);
+	    }
+	  }, {
+	    key: 'setup',
+	    value: function setup(data, url) {
+	      var body = new Blob([JSON.stringify(data)], { type: 'application/json' });
+	      this.sessionConnection(body, url);
+	    }
+	  }, {
+	    key: 'sessionConnection',
+	    value: function sessionConnection(body, url) {
+	      var setToken = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.setToken;
 
-	      var sesh = new _session_tools2.default();
-
-	      var data;
 	      var req = new XMLHttpRequest();
 	      req.open('POST', url, true);
 	      req.setRequestHeader("Content-Type", "application/json");
@@ -500,12 +490,18 @@
 	        var stat = this.status;
 	        var valid = stat >= 200 && stat < 300;
 	        if (valid) {
-	          data = JSON.parse(this.responseText)['data']['attributes']['token'];
-	          sesh.setToken(data);
+	          setToken(this.responseText);
 	        }
 	        // else { console.log(this.error) }
 	      };
-	      req.send();
+	      req.send(body);
+	    }
+	  }, {
+	    key: 'setToken',
+	    value: function setToken(data) {
+	      var sesh = new _session_tools2.default();
+	      var token = JSON.parse(data)['data']['attributes']['token'];
+	      sesh.setToken(token);
 	    }
 	  }]);
 
@@ -619,60 +615,36 @@
 	var SearchTitles = function () {
 	  function SearchTitles() {
 	    _classCallCheck(this, SearchTitles);
-
-	    this.url = 'https://movie-maze.herokuapp.com/api/v1/search';
 	  }
 
 	  _createClass(SearchTitles, [{
 	    key: 'get_titles',
 	    value: function get_titles() {
 	      var title = document.getElementById('search-bar').value;
-	      var obj = { "term": title };
-	      var body = JSON.stringify(obj);
-	      // let blob = new Blob( [ body ], {type : 'application/json'})
-	      // let blob = new Blob( body, {type: 'application/json'} )
-	      // let blob = new Blob( [body] )
-	      // let blob = new Blob( [body], {type: 'json'} )
-	      // let url  = `https://movie-maze.herokuapp.com/api/v1/search`
 	      var url = 'https://movie-maze.herokuapp.com/api/v1/search?term=' + title;
-
-	      var results = new _title_results2.default();
-
-	      var data;
+	      var displayResults = this.displayResults;
 	      var req = new XMLHttpRequest();
 	      req.open('GET', url, true);
 	      req.setRequestHeader("Content-Type", "application/json");
 	      req.setRequestHeader("Accept", "application/json");
-	      // req.setRequestHeader("CONTENT-TYPE", "application/json")
-	      // req.setRequestHeader("ACCEPT",        "application/json")
 	      req.onload = function () {
 	        var stat = this.status;
 	        var valid = stat >= 200 && stat < 300;
 	        if (valid) {
-	          data = JSON.parse(this.responseText)['data']['attributes'];
-	          results.loadResults(data);
+	          displayResults(this.responseText);
 	        }
 	        // else { console.log(this.error) }
 	      };
-	      // var blob = new Blob([ JSON.stringify(body)], {type : 'application/json'});
-	      // var blob = new Blob([ JSON.stringify(obj)], {type : 'application/json'});
-	      // req.send(blob)
-	      // req.send( body )
+
 	      req.send();
 	    }
-
-	    // fetch(url, {
-	    //   method: 'GET',
-	    //   headers: {
-	    //               "Content-Type": "application/json",
-	    //               "Accept":       "application/json",
-	    //             }
-	    // })
-	    // .request( blob )
-	    // .then( data => JSON.parse(data)['data']['attributes'])
-	    // .then( parseFunc(data))
-
-
+	  }, {
+	    key: 'displayResults',
+	    value: function displayResults(response) {
+	      var data = JSON.parse(response)['data']['attributes'];
+	      var results = new _title_results2.default();
+	      results.loadResults(data);
+	    }
 	  }]);
 
 	  return SearchTitles;
@@ -723,7 +695,7 @@
 	      var div = this.tool.getElement('content');
 	      this.tool.clearElement(div);
 	      this.render_term(data['term'], div);
-	      this.render_titles(data['results'], div);
+	      data['results'].length == 0 ? this.renderNoTitles(div) : this.render_titles(data['results'], div);
 	    }
 
 	    // ---- Search Term ----
@@ -746,6 +718,21 @@
 	    // ---- Search Results ----
 
 	  }, {
+	    key: 'renderNoTitles',
+	    value: function renderNoTitles(div) {
+	      var span = this.tool.newElement('span');
+	      this.tool.elementNames(span, 'NoResultsContainer');
+	      this.clearPreviousSearch();
+	      span.innerHTML = "Sorry, there are no matches for that title.";
+	      div.appendChild(span);
+	    }
+	  }, {
+	    key: 'clearPreviousSearch',
+	    value: function clearPreviousSearch() {
+	      var sesh = new _session_tools2.default();
+	      sesh.clearMovies();
+	    }
+	  }, {
 	    key: 'render_titles',
 	    value: function render_titles(data, element) {
 	      var _this = this;
@@ -753,8 +740,7 @@
 	      var div = this.tool.newElement('div');
 	      this.tool.elementNames(div, 'ResultsContainer');
 
-	      var sesh = new _session_tools2.default();
-	      sesh.clearMovies();
+	      this.clearPreviousSearch();
 
 	      var elements = data.map(function (r) {
 	        _this.media_card(r, div);
@@ -790,15 +776,10 @@
 	    value: function addMediaImage(src, element) {
 	      var span = this.tool.newElement('span');
 	      this.tool.elementNames(span, null, 'imgContainer');
-	      if (src) {
-	        var img = this.tool.newElement('img');
-	        img.src = src;
-	      } else {
-	        var img = this.tool.newElement('span');
-	        var p = this.tool.newElement('p');
-	        p.innerHTML = "No Image";
-	        img.appendChild(p);
-	      }
+
+	      var img = this.tool.newElement('img');
+	      img.src = src ? src : 'https://i.imgur.com/lLschNS.png';
+
 	      img.className = "mediaPoster";
 	      span.appendChild(img);
 	      element.appendChild(span);
@@ -855,14 +836,10 @@
 	  _createClass(MovieService, [{
 	    key: 'getMovie',
 	    value: function getMovie(title) {
-	      var obj = { "title": title };
-	      var body = JSON.stringify(obj);
-	      var blob = new Blob([body], { type: 'application/json' });
+	      var displayMovie = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.displayMovie;
 
 	      var url = 'https://movie-maze.herokuapp.com/api/v1/movie?title=' + title;
 
-	      var movie = new _movie2.default();
-	      var data;
 	      var req = new XMLHttpRequest();
 	      req.open('GET', url, true);
 	      req.setRequestHeader("Content-Type", "application/json");
@@ -871,12 +848,18 @@
 	        var stat = this.status;
 	        var valid = stat >= 200 && stat < 300;
 	        if (valid) {
-	          data = JSON.parse(this.responseText)['data']['attributes'];
-	          movie.loadMovie(data);
+	          displayMovie(this.responseText);
 	        }
 	        // else { console.log(this.error) }
 	      };
 	      req.send();
+	    }
+	  }, {
+	    key: 'displayMovie',
+	    value: function displayMovie(response) {
+	      var data = JSON.parse(response)['data']['attributes'];
+	      var movie = new _movie2.default();
+	      movie.loadMovie(data);
 	    }
 	  }]);
 
@@ -947,15 +930,8 @@
 	      var span = this.tool.newElement('span');
 	      this.tool.elementNames(span, 'Poster', null);
 
-	      if (src) {
-	        var img = this.tool.newElement('img');
-	        img.src = src;
-	      } else {
-	        var img = this.tool.newElement('span');
-	        var p = this.tool.newElement('p');
-	        p.innerHTML = "No Image";
-	        img.appendChild(p);
-	      }
+	      var img = this.tool.newElement('img');
+	      img.src = src ? src : 'https://i.imgur.com/lLschNS.png';
 
 	      span.appendChild(img);
 	      element.appendChild(span);
